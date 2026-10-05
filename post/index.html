@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Publicación de Comunidad Viajera | descubreCR</title>
+  <style>
+    body{margin:0;background:#f6faf7;color:#18332a;font:16px/1.5 system-ui,sans-serif}
+    main{box-sizing:border-box;max-width:440px;margin:12vh auto;padding:32px 24px;text-align:center}
+    h1{color:#075f3c;font-size:26px;line-height:1.2}
+    a{display:block;min-height:48px;box-sizing:border-box;margin:14px 0;padding:12px;border-radius:12px;background:#087443;color:white;font-weight:700;text-decoration:none}
+    a.secondary{border:1px solid #087443;background:transparent;color:#075f3c}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Comunidad Viajera</h1>
+    <p id="status">Abriendo la publicación en descubreCR…</p>
+    <a id="open" hidden>Abrir en la aplicación</a>
+    <a id="store" class="secondary" hidden>Instalar descubreCR</a>
+  </main>
+  <script>
+    const id = new URLSearchParams(location.search).get('id') || '';
+    const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const android = /Android/i.test(navigator.userAgent);
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const playStore = 'https://play.google.com/store/apps/details?id=com.descubriendo.cr';
+    const appStore = ''; // Agregar la URL pública apps.apple.com/app/id... al publicar en iOS.
+    const storeUrl = android ? playStore : ios ? appStore : playStore;
+    const status = document.getElementById('status');
+    const open = document.getElementById('open');
+    const store = document.getElementById('store');
+
+    if (!valid) {
+      status.textContent = 'El enlace de esta publicación no es válido.';
+    } else {
+      const appUrl = `descubriendocr:///post/${id}`;
+      open.href = appUrl;
+      open.hidden = false;
+      if (storeUrl) {
+        store.href = storeUrl;
+        store.hidden = false;
+      }
+      if (android || ios) {
+        let leftPage = false;
+        const markLeft = () => { leftPage = true; };
+        document.addEventListener('visibilitychange', () => { if (document.hidden) markLeft(); });
+        window.addEventListener('pagehide', markLeft);
+        setTimeout(() => { location.href = appUrl; }, 100);
+        setTimeout(() => {
+          if (leftPage) return;
+          if (storeUrl) location.replace(storeUrl);
+          else status.textContent = 'La versión para iPhone aún no está publicada. Si ya tenés la app, tocá «Abrir en la aplicación».';
+        }, 2200);
+      } else status.textContent = 'Abrí este enlace en tu teléfono para ver la publicación.';
+    }
+  </script>
+</body>
+</html>
